@@ -66,7 +66,6 @@ class DecisionTreeClassifier_Modified(DecisionTreeClassifier):
         return self.calc_split_feature_z_score(node,x[feature_id])
     '''
     A recursive predict fucntion
-
         Parameters:
             x (array): The samples data for prediction
             node(int): Current node in the tree
@@ -78,14 +77,14 @@ class DecisionTreeClassifier_Modified(DecisionTreeClassifier):
         Returns:
             predict (np.array): The calcualted prediction for each sample
     '''
-    def recurse_predict(self, x, node, depth, node_feature_id, in_alpha, in_rnd_list, to_print):
+    def recurse_predict(self, x, node, depth, node_feature_id, in_alpha, in_rnd_list, to_print=False):
         try:
             if self.tree_.feature[node] != _tree.TREE_UNDEFINED:
                 feature_id = node_feature_id[node]
                 feature_threshold = self.tree_.threshold[node]
                 if to_print:
-                    print('feature_id {}. feature_threshold:{}, feature_value:{},rnd:{}'.format(feature_id,feature_threshold,x[feature_id],in_rnd_list[node]))
-
+                    print('feature_id {}. feature_threshold:{}'.format(feature_id,feature_threshold))
+                
                 if (bool((x[feature_id]<=feature_threshold)) != bool(in_rnd_list[node]==1)):
                 #if (bool(self.split_logic_z_score(x, node, node_feature_id)) != bool(in_rnd_list[node]==1)):
                     if to_print:
@@ -105,7 +104,6 @@ class DecisionTreeClassifier_Modified(DecisionTreeClassifier):
 
     '''
     A warpper function for the recursive predict fucntion
-
         Parameters:
             x (array): The samples data for prediction
             in_alpha (float): The probability of taking the opposite direction of what the node condition indicates.
@@ -126,7 +124,6 @@ class DecisionTreeClassifier_Modified(DecisionTreeClassifier):
     '''
     This function iterate for each sample and calculate the predicted probabilty. For performace issues, before calling the predict_proba_one function, this 
     function calculated for all nodes and all samples the indication of whether using the corerct direction or the opposite direction of the node.
-
         Parameters:
             x (array): The samples data for prediction
             in_alpha (float): The probability of taking the opposite direction of what the node condition indicates.
@@ -158,7 +155,6 @@ class DecisionTreeClassifier_Modified(DecisionTreeClassifier):
     '''
     This is an override on the legend function predict_proba, this function call the predict_proba_rnd (which get alpha as input and randomly with the
     probability of alpha decided to use the opposite branch of the node).
-
         Parameters:
             x (array): The samples data for prediction
             in_alpha (float): The probability of taking the opposite direction of what the node condition indicates.
@@ -169,7 +165,11 @@ class DecisionTreeClassifier_Modified(DecisionTreeClassifier):
     '''
     def predict_proba(self,x,in_alpha=0.1,in_n=50,to_print=False,check_input=False):
         try:
-            ret_val = Parallel(n_jobs=12)(delayed(self.predict_proba_rnd)(x,in_alpha,to_print) for ind in range(in_n))
+            #ret_val = Parallel(n_jobs=12)(delayed(self.predict_proba_rnd)(x,in_alpha,to_print) for ind in range(in_n))
+            ret_val = []
+            for ind in range(in_n):
+                ret_val.append(self.predict_proba_rnd(x,in_alpha,to_print))
+                
             return np.average(np.array(ret_val),axis=0)
         except Exception as e:
             print("Error when calling {} function".format("predict_proba"))
@@ -181,7 +181,6 @@ class DecisionTreeRegressor_Modified(DecisionTreeRegressor):
     # section 1-2
     '''
     A recursive predict fucntion
-
         Parameters:
             x (array): The samples data for prediction
             node(int): Current node in the tree
@@ -219,7 +218,6 @@ class DecisionTreeRegressor_Modified(DecisionTreeRegressor):
     
     '''
     A warpper function for the recursive predict fucntion
-
         Parameters:
             x (array): The samples data for prediction
             in_alpha (float): The probability of taking the opposite direction of what the node condition indicates.
@@ -242,7 +240,6 @@ class DecisionTreeRegressor_Modified(DecisionTreeRegressor):
     '''
     This function iterate for each sample and calculate the predicted probabilty. For performace issues, before calling the predict_proba_one function, this 
     function calculated for all nodes and all samples the indication of whether using the corerct direction or the opposite direction of the node.
-
         Parameters:
             x (array): The samples data for prediction
             in_alpha (float): The probability of taking the opposite direction of what the node condition indicates.
@@ -276,7 +273,6 @@ class DecisionTreeRegressor_Modified(DecisionTreeRegressor):
     '''
     This is an override on the legend function predict, this function call the predict_proba_rnd (which get alpha as input and randomly with the
     probability of alpha decided to use the opposite branch of the node).
-
         Parameters:
             x (array): The samples data for prediction
             in_alpha (float): The probability of taking the opposite direction of what the node condition indicates.
